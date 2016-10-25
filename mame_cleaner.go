@@ -15,7 +15,7 @@ var datFile = flag.String("dat_file", "", "The DAT file.")
 
 type Query struct {
 	Header Header `xml:"header"`
-	GameList []Game `xml:"game"`
+	RomList []Rom `xml:"game"`
 }
 
 type Header struct {
@@ -23,31 +23,46 @@ type Header struct {
 	Version string  `xml:"version"`
 }
 
-type Game struct {
+type Rom struct {
 	Name string `xml:"name,attr"`
 	CloneOf string `xml:"cloneof,attr"`
 	RomOf string `xml:"romof,attr"`
 	IsBios string `xml:"isbios,attr"`
 	Description string `xml:"description"`
+	Region string
+	Date int
 }
 
+type Game struct {
+	Parent Rom
+	Children []Rom
+}
 
-func main() {
+func extractGames(romList []Rom) map[string]Game {
 
-	flag.Parse()
-	q := parseXml()
+	games := make(map[string]Game)
 
-	fmt.Println("ROM DIR: " + *romDir)
-	fmt.Println("DAT FILE: " + *datFile)
+	for _, rom := range romList[20:80] {
+	
+		fmt.Printf("%v", rom)
 
-	for _, game := range q.GameList {
-		if game.CloneOf == "" {
-			fmt.Printf("\t%s\n", game)
+		if rom.CloneOf == "" {
+			fmt.Println("ajout de " + rom.Name)
+			game := games[rom.Name]
+			game.Parent = rom
+			games[rom.Name] = game
+		} else {
+			game := games[rom.CloneOf]
+			fmt.Println("   ajout enfant  pour " + rom.CloneOf + " -> " + rom.Name)
+			game.Children = append(game.Children, rom)
+			games[rom.CloneOf] = game
 		}
+		
+
 	}
 
-	fmt.Println(q.Header)
-	fmt.Println(len(q.GameList))
+	return games
+
 }
 
 func parseXml() Query {
@@ -67,3 +82,22 @@ func parseXml() Query {
 
 	return q
 }
+
+
+func main() {
+
+	flag.Parse()
+	q := parseXml()
+
+	fmt.Println("ROM DIR: " + *romDir)
+	fmt.Println("DAT FILE: " + *datFile)
+	
+	games := extractGames(q.RomList)
+
+	for _, game := range games {
+		fmt.Println("    Game " + game.Parent.Name)		
+		fmt.Println(game.Parent)		
+		fmt.Println(game.Children)		
+	}
+}
+
