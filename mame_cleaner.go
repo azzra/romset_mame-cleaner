@@ -11,6 +11,7 @@ import (
 
 var romDir = flag.String("rom_dir", ".", "The directory containing the roms file to process.")
 var dryRun = flag.Bool("dry_run", true, "Print what will be moved.")
+var regFav = flag.String("reg_fav", "world,europe,eu,france,french,fr,usa,us", "Favorites region(s).")
 var datFile = flag.String("dat_file", "", "The DAT file.")
 
 type Query struct {
@@ -42,26 +43,46 @@ func extractGames(romList []Rom) map[string]Game {
 
 	games := make(map[string]Game)
 
-	for _, rom := range romList[20:80] {
+	for _, rom := range romList {
 	
-		fmt.Printf("%v", rom)
-
 		if rom.CloneOf == "" {
-			fmt.Println("ajout de " + rom.Name)
+			//fmt.Println("ajout de " + rom.Name)
 			game := games[rom.Name]
 			game.Parent = rom
+			game.Children = append(game.Children, rom)
 			games[rom.Name] = game
 		} else {
 			game := games[rom.CloneOf]
-			fmt.Println("   ajout enfant  pour " + rom.CloneOf + " -> " + rom.Name)
+			//fmt.Println("   ajout enfant  pour " + rom.CloneOf + " -> " + rom.Name)
 			game.Children = append(game.Children, rom)
 			games[rom.CloneOf] = game
 		}
 		
-
 	}
 
 	return games
+}
+
+
+func processGames(games map[string]Game) {
+
+	for _, game:= range games {
+
+		if game.Parent.Name != "" {
+			fmt.Println(game.Parent.Name + ": " + game.Parent.Description + " // found ", len(game.Children))
+		} else {
+			fmt.Println("NO PARENT FOUND: " + game.Children[0].Name)
+		}
+
+		findMatchingRom(game)		
+	}
+
+}
+
+
+func findMatchingRom(game Game) *Rom {
+
+	return &game.Parent
 
 }
 
@@ -94,10 +115,6 @@ func main() {
 	
 	games := extractGames(q.RomList)
 
-	for _, game := range games {
-		fmt.Println("    Game " + game.Parent.Name)		
-		fmt.Println(game.Parent)		
-		fmt.Println(game.Children)		
-	}
+	processGames(games)
 }
 
