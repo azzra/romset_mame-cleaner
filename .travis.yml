@@ -12,5 +12,5 @@ before_install:
     - go get github.com/mattn/goveralls
 
 script:
-    - cd $GOPATH/src/github.com/azzra/romset-cleaner
+    - cd $GOPATH/src/github.com/azzra/romset_mame-cleaner
     - $HOME/gopath/bin/goveralls -service=travis-ci
