@@ -15,7 +15,7 @@ var datFile = flag.String("dat_file", "", "The DAT file.")
 var dryRun = flag.Bool("dry_run", true, "Print what will be moved.")
 var regFav = flag.String("reg_fav", "world,europe,eu,france,french,fr,usa,us", "Favorites region(s).")
 var romDir = flag.String("rom_dir", ".", "The directory containing the roms file to process.")
-var prefLast = flag.Bool("pref_last", true, "I more than 1 rom match, choose the last one.")
+var prefLast = flag.Bool("pref_last", true, "If more than 1 rom match, choose the last one.")
 
 type Query struct {
 	Header  Header `xml:"header"`
